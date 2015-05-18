@@ -6,6 +6,8 @@ var app = express();
 app.use(express.static(path.join(__dirname,'client')));
 app.use(bodyParser.json());
 
-var server = app.listen(8000, function(){
-	console.log('listening to port 8000');
+var port = process.env.PORT || 5000;
+
+var server = app.listen(port, function(){
+	console.log('listening to port ' + port);
 });
