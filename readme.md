@@ -1,0 +1,1 @@
+## Construct paths from an origin word to a target word where intermediate words differ by a character from their adjacent words.

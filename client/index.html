@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Path Search</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+
+		function pathSearch (origin, target)
+		{
+			$.getJSON( "dictionary.json", function(dictionary) {
+
+				// false if mismatched lengths or words not found in dictionary
+				if (origin.length != target.length || !(origin.toUpperCase() in dictionary) || !(target.toUpperCase() in dictionary)) {
+					writeMessage('Invalid parameters');
+					return false;
+				}
+
+				// pull all words of same length
+				var resource = [];
+
+				for (var word in dictionary) {
+					if (word.length == origin.length) {
+						resource.push(word);
+					}
+				}
+
+				// Node class
+				var Node = function(word) {
+					this.word = word.toUpperCase();
+					this.prev = null;
+					this.next = [];
+
+					this.connect = function() {
+						var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+						// outside loop covers each character in word
+						for (var i=0; i<this.word.length; i++) {
+							// inside loop covers each character of alphabet
+							for (var j=0; j<alphabet.length; j++) {
+								// split into array
+								var strConstruct = this.word.split('');
+
+								// change one character
+								strConstruct[i] = alphabet[j];
+								strConstruct = strConstruct.join('');
+
+								// if target, return
+								if (strConstruct == target.toUpperCase()) {
+									var current = this;
+									var path = [target.toUpperCase()];
+
+									while (current != null) {
+										path.push(current.word);
+										current = current.prev;
+									}
+
+									path = path.reverse();
+									writePaths(path);
+									return true;
+								}
+
+								// declare and remove from resource
+								var resourceIdx = resource.indexOf(strConstruct);
+								if (resourceIdx > -1 && strConstruct != origin.toUpperCase()) {
+									// create and add intermediate node to next layer
+									var intermediate = new Node(strConstruct);
+
+									// set next and prev connections
+									this.next.push(intermediate);
+									intermediate.prev = this;
+
+									// remove from resource
+									resource[resourceIdx] = resource[resource.length-1];
+									resource.pop();
+								}
+							}
+						}
+
+						// if no new connections set, disconnect
+						if (!this.next.length) {
+							this.disconnect();
+							return false;
+						}
+
+						// propogate connect()
+						for (var k=0; k<this.next.length; k++) {
+							this.next[k].connect();
+						}
+					}
+
+					this.disconnect = function() {
+						console.log('dead end');
+
+						if(this.word == origin.toUpperCase()) {
+							writeMessage('No connections exist.')
+							return false;
+						}
+
+						// remove from prev's collection
+						this.prev.next[this.prev.next.indexOf(this)] = this.prev.next[this.prev.next.length - 1];
+						this.prev.next.pop();
+
+						// propogate disconnect()
+						if (!this.prev.next.length) {
+							this.prev.disconnect();
+						}
+					}
+				}
+
+				var originNode = new Node(origin);
+				originNode.connect();
+			});
+		}
+
+		function writePaths(path) {
+			var content = '<p>';
+
+			for (var i=0; i<path.length-1; i++) {
+				content += path[i];
+				content += ' -> '
+			}
+
+			content += path[i];
+			content += ' </p>'
+			$('#result').append(content);
+		}
+
+		function writeMessage(string) {
+			var content = '<p class="text-danger">';
+
+			content += string
+
+			content += ' </p>'
+			$('#result').append(content);
+		}
+
+		$(document).ready(function() {
+			$('#pathSearch').submit(function() {
+				$('#result').html('');
+				pathSearch($('#origin').val(), $('#target').val());
+				return false;
+			})
+		});
+
+	</script>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-6">
+				<!-- positive test case: "tame", "rent" -->
+				<!-- negative test case: "bridal", "batter" -->
+				<!-- corner case: "dog", "dog" -->
+				<!-- corner case: "sent", "rent" -->
+				<form id="pathSearch">
+					<div class="form-group">
+						<label>Origin:</label>
+						<input class="form-control" id="origin" type="text">
+					</div>
+
+					<div class="form-group">
+						<label>Target:</label>
+						<input class="form-control" id="target" type="text">
+					</div>
+
+					<input class="form-control" type="submit">
+				</form>
+			</div>
+
+			<div class="col-xs-6">
+				<h4>Construct paths from an origin word to a target word where intermediate words differ by a character from their adjacent words.</h4>
+				<h4>View source for code.</h4>
+			</div>
+		</div>
+
+		<div id="result"></div>
+	</div>
+</body>
+</html>
