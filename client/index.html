@@ -22,11 +22,14 @@
 		});
 	});
 
+	// main problem-solving function
 	function WordLadder(startWord, endWord) {
+		var success = false;
+
 		// input errors
-		if (startWord.length != endWord.length) { writeHTML('Words must be the same length'); }
-		if (!(startWord.toLowerCase() in dictionary)) { writeHTML('errors','text-danger','"' + startWord + '"' + ' was not found in the dictionary.'); }
-		if (!(endWord.toLowerCase() in dictionary)) { writeHTML('errors','text-danger','"' + endWord + '"' + ' was not found in the dictionary.'); }
+		if (startWord.length != endWord.length) { return writeHTML('errors','text-danger','Words must be the same length'); }
+		if (!(startWord.toLowerCase() in dictionary)) { return writeHTML('errors','text-danger','"' + startWord + '"' + ' was not found in the dictionary.'); }
+		if (!(endWord.toLowerCase() in dictionary)) { return writeHTML('errors','text-danger','"' + endWord + '"' + ' was not found in the dictionary.'); }
 
 		// create resource object to push used words
 		var resource = {};
@@ -39,26 +42,31 @@
 		while (!queue.isEmpty()) {
 			var node = queue.dequeue();
 
+			// return if endWord is reached
+			if (node.word == endWord.toLowerCase()) {
+				writeHTML('result', 'text-success', node.path());
+				success = true;
+				continue;
+			}
+
 			if (!(node.word in resource)) {
-				console.log('propogating ', node.word);
 				// add node word to resource object
 				resource[node.word] = null;
 
-				// return if endWord is reached
-				if (node.word == endWord.toLowerCase()) {
-					return writeHTML('result', 'text-success', node.path());
-				}
-
 				// create and enqueue adjacent words
-				node.adjacent = graphExtend(node.word);
+				var children = graphExtend(node.word);
 
-				for (var i=0; i<node.adjacent.length; i++) {
-					var child = new graphNode(node.adjacent[i]);
-					child.parent = node;
+				for (var i=0; i<children.length; i++) {
+					var child = new graphNode(children[i]);
+					child.parent = node; // set child's parent
+					node.adjacent.push(child); // update array of parent's adjacent nodes
 					queue.enqueue(child);
 				}
 			}
 		}
+
+		// return only if search was unsuccessful
+		if (!success) { return writeHTML('result', 'text-danger', 'No paths exist between these two words.'); }
 	}
 
 	// substitute each character in the word all characters
@@ -75,6 +83,7 @@
 		return result;
 	}
 
+	// graph item
 	var graphNode = function(word) {
 		this.word = word;
 		this.parent = null;
@@ -100,12 +109,13 @@
 		};
 	};
 
+	// queue item
 	var queueNode = function(item) {
 		this.item = item;
 		this.next = null;
 	};
 
-	// Queue class. enqueue to back, dequeue from front
+	// Queue class. enqueue to last, dequeue from first
 	var Queue = function() {
 		var first = null;
 		var last = null;
@@ -137,6 +147,7 @@
 		};
 	};
 
+	// function to write HTML content
 	function writeHTML(id, style, string) {
 		$('#' + id).append('<h4 class="' + style + '">'+ string + '</h4>');
 	}
@@ -148,26 +159,29 @@
 		<div class="row">
 			<div class="col-xs-6">
 				<h4>Construct paths from a start word to an end word where intermediate words differ by a character from their adjacent words.</h4>
-				<h4>Enter two words of the same length. The algorithm references against <a href="http://www.freescrabbledictionary.com/sowpods/download/sowpods.txt">SOWPODS (Europe Scrabble Word List)</a>, so some words may not be valid due to obscurity or existing in a different form.</h4>
+				<h4>Enter two words of the same length. The algorithm references against <a href="http://www.freescrabbledictionary.com/sowpods/download/sowpods.txt">SOWPODS (Europe Scrabble Word List)</a>. The algorithm will draw paths that avoid circling back to a word that have already been used at a branching point.</h4>
 				<h4>View source for the code.</h4>
+				<h4>Examples:</h4>
+				<ul>
+					<li>positive test case: "tame", "rent"</li>
+					<li>negative test case: "bridal", "batter"</li>
+					<li>corner case: "dog", "dog"</li>
+					<li>corner case: "sent", "rent"</li>
+				</ul>
 
-				<!-- positive test case: "tame", "rent" -->
-				<!-- negative test case: "bridal", "batter" -->
-				<!-- corner case: "dog", "dog" -->
-				<!-- corner case: "sent", "rent" -->
+				<div id="errors"></div>
+
+				<div class="form-group">
+					<label>Start Word:</label>
+					<input class="form-control" id="startWord" type="text">
+				</div>
+
+				<div class="form-group">
+					<label>End Word:</label>
+					<input class="form-control" id="endWord" type="text">
+				</div>
+
 				<form id="pathSearch">
-					<div id="errors"></div>
-
-					<div class="form-group">
-						<label>Start Word:</label>
-						<input class="form-control" id="startWord" type="text">
-					</div>
-
-					<div class="form-group">
-						<label>End Word:</label>
-						<input class="form-control" id="endWord" type="text">
-					</div>
-
 					<input class="form-control" type="submit">
 				</form>
 			</div>
