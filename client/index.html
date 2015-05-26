@@ -2,13 +2,20 @@
 <html>
 <head>
 	<title>Path Search</title>
+	<!-- Latest compiled and minified jQuery -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	<!-- Style sheet -->
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<!-- Latest compiled and minified D3js -->
+	<script src="http://d3js.org/d3.v2.js?2.9.1"></script>
 	<!-- Official Scrabble Player's Dictionary -->
 	<script src="dictionary.js"></script>
+	<script src="queue.js"></script>
+	<script src="graph.js"></script>
 	<script type="text/javascript">
 
 	$(document).ready(function(){
@@ -16,8 +23,6 @@
 			$('#result').html('');
 			$('#errors').html('');
 			WordLadder($('#startWord').val(), $('#endWord').val());
-			$('#startWord').val('');
-			$('#endWord').val('');
 			return false;
 		});
 	});
@@ -25,11 +30,13 @@
 	// main problem-solving function
 	function WordLadder(startWord, endWord) {
 		var success = false;
+		startWord = startWord.toLowerCase();
+		endWord = endWord.toLowerCase();
 
 		// input errors
 		if (startWord.length != endWord.length) { return writeHTML('errors','text-danger','Words must be the same length'); }
-		if (!(startWord.toLowerCase() in dictionary)) { return writeHTML('errors','text-danger','"' + startWord + '"' + ' was not found in the dictionary.'); }
-		if (!(endWord.toLowerCase() in dictionary)) { return writeHTML('errors','text-danger','"' + endWord + '"' + ' was not found in the dictionary.'); }
+		if (!(startWord in dictionary)) { return writeHTML('errors','text-danger','"' + startWord + '"' + ' was not found in the dictionary.'); }
+		if (!(endWord in dictionary)) { return writeHTML('errors','text-danger','"' + endWord + '"' + ' was not found in the dictionary.'); }
 
 		// create resource object to push used words
 		var resource = {};
@@ -43,7 +50,7 @@
 			var node = queue.dequeue();
 
 			// return if endWord is reached
-			if (node.word == endWord.toLowerCase()) {
+			if (node.word == endWord) {
 				writeHTML('result', 'text-success', node.path());
 				success = true;
 				continue;
@@ -64,6 +71,9 @@
 				}
 			}
 		}
+
+		// graph words
+		graphWords(startWord, endWord);
 
 		// return only if search was unsuccessful
 		if (!success) { return writeHTML('result', 'text-danger', 'No paths exist between these two words.'); }
@@ -109,43 +119,10 @@
 		};
 	};
 
-	// queue item
-	var queueNode = function(item) {
-		this.item = item;
-		this.next = null;
-	};
-
-	// Queue class. enqueue to last, dequeue from first
-	var Queue = function() {
-		var first = null;
-		var last = null;
-
-		this.enqueue = function(item) {
-			if (!first) {
-				last = new queueNode(item);
-				first = last;
-			} else {
-				last.next = new queueNode(item);
-				last = last.next;
-			}
-		};
-
-		this.dequeue = function() {
-			if (first) {
-				var item = first.item;
-
-				first = first.next;
-				if (!first) { last = null; } // if empty, empty queue
-
-				return item;
-			}
-			return null;
-		};
-
-		this.isEmpty = function() {
-			return (!first);
-		};
-	};
+	function graphWords(startWord, endWord) {
+		var length = startWord.length;
+		var links = [];
+	}
 
 	// function to write HTML content
 	function writeHTML(id, style, string) {
@@ -157,14 +134,14 @@
 <body>
 	<div class="container">
 		<div class="row">
-			<div class="col-xs-6">
-				<h4>Construct paths from a start word to an end word where intermediate words differ by a character from their adjacent words.</h4>
+			<div class="col-sm-4">
+				<h4>Construct paths from a start word to an end word where intermediate words differ by a character from their adjacent words. Based on Lewis Carroll's <a href="http://en.wikipedia.org/wiki/Word_ladder">Word Ladder</a> game.</h4>
 				<h4>Enter two words of the same length. The algorithm references against <a href="http://www.freescrabbledictionary.com/sowpods/download/sowpods.txt">SOWPODS (Europe Scrabble Word List)</a>. The algorithm will draw paths that avoid circling back to a word that have already been used at a branching point.</h4>
 				<h4>View source for the code.</h4>
 				<h4>Examples:</h4>
 				<ul>
 					<li>positive test case: "tame", "rent"</li>
-					<li>negative test case: "bridal", "batter"</li>
+					<li>negative test case: "batter", "bridal"</li>
 					<li>corner case: "dog", "dog"</li>
 					<li>corner case: "sent", "rent"</li>
 				</ul>
@@ -186,7 +163,7 @@
 				</form>
 			</div>
 
-			<div id="result" class="col-xs-6"></div>
+			<div id="result" class="col-sm-8"></div>
 		</div>
 	</div>
 </body>
