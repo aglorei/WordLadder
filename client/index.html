@@ -28,6 +28,7 @@
 
 		$('#graphDraw').submit(function() {
 			graphDraw($('#startWord').val(), $('#endWord').val());
+			return false;
 		});
 
 		// 'cat'/'dog' example
