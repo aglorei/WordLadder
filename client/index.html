@@ -11,7 +11,7 @@
 	<!-- Style sheet -->
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<!-- Latest compiled and minified D3js -->
-	<script src="http://d3js.org/d3.v2.js?2.9.1"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 	<!-- Official Scrabble Player's Dictionary -->
 	<script src="dictionary.js"></script>
 	<script src="queue.js"></script>
@@ -19,17 +19,26 @@
 	<script type="text/javascript">
 
 	$(document).ready(function(){
-		$('#pathSearch').submit(function() {
+		$('#wordLadder').submit(function() {
 			$('#result').html('');
 			$('#errors').html('');
 			WordLadder($('#startWord').val(), $('#endWord').val());
 			return false;
 		});
+
+		$('#graphDraw').submit(function() {
+			graphDraw($('#startWord').val(), $('#endWord').val());
+		});
+
+		// 'cat'/'dog' example
+		$('#startWord').val('cat');
+		$('#endWord').val('dog');
+		WordLadder('cat', 'dog');
+		graphDraw('cat', 'dog');
 	});
 
 	// main problem-solving function
 	function WordLadder(startWord, endWord) {
-		var success = false;
 		startWord = startWord.toLowerCase();
 		endWord = endWord.toLowerCase();
 
@@ -38,8 +47,8 @@
 		if (!(startWord in dictionary)) { return writeHTML('errors','text-danger','"' + startWord + '"' + ' was not found in the dictionary.'); }
 		if (!(endWord in dictionary)) { return writeHTML('errors','text-danger','"' + endWord + '"' + ' was not found in the dictionary.'); }
 
-		// create resource object to push used words
-		var resource = {};
+		// create object to push used words
+		var usedWords = {};
 
 		// create queue for BFS and enqueue startWord
 		var queue = new Queue();
@@ -51,14 +60,12 @@
 
 			// return if endWord is reached
 			if (node.word == endWord) {
-				writeHTML('result', 'text-success', node.path());
-				success = true;
-				continue;
+				return writeHTML('result', 'text-success', node.path());
 			}
 
-			if (!(node.word in resource)) {
+			if (!(node.word in usedWords)) {
 				// add node word to resource object
-				resource[node.word] = null;
+				usedWords[node.word] = null;
 
 				// create and enqueue adjacent words
 				var children = graphExtend(node.word);
@@ -72,11 +79,8 @@
 			}
 		}
 
-		// graph words
-		graphWords(startWord, endWord);
-
 		// return only if search was unsuccessful
-		if (!success) { return writeHTML('result', 'text-danger', 'No paths exist between these two words.'); }
+		return writeHTML('result', 'text-danger', 'No paths exist between these two words.');
 	}
 
 	// substitute each character in the word all characters
@@ -119,11 +123,6 @@
 		};
 	};
 
-	function graphWords(startWord, endWord) {
-		var length = startWord.length;
-		var links = [];
-	}
-
 	// function to write HTML content
 	function writeHTML(id, style, string) {
 		$('#' + id).append('<h4 class="' + style + '">'+ string + '</h4>');
@@ -132,11 +131,12 @@
 	</script>
 </head>
 <body>
-	<div class="container">
+	<div class="container-fluid">
 		<div class="row">
-			<div class="col-sm-4">
+			<div id="left-column" class="col-sm-3">
 				<h4>Construct paths from a start word to an end word where intermediate words differ by a character from their adjacent words. Based on Lewis Carroll's <a href="http://en.wikipedia.org/wiki/Word_ladder">Word Ladder</a> game.</h4>
-				<h4>Enter two words of the same length. The algorithm references against <a href="http://www.freescrabbledictionary.com/sowpods/download/sowpods.txt">SOWPODS (Europe Scrabble Word List)</a>. The algorithm will draw paths that avoid circling back to a word that have already been used at a branching point.</h4>
+				<h4>Enter two words of the same length. The algorithm references against <a href="http://www.freescrabbledictionary.com/sowpods/download/sowpods.txt">SOWPODS (Europe Scrabble Word List)</a>. The algorithm will draw the shortest existing path between the two words.</h4>
+				<h4>The graphing algorithm uses <a href="http://d3js.org">D3.js</a> to visually render edges between all words of the same length. Singletons are not included for the sake of conserving client-side resources.</h4>
 				<h4>View source for the code.</h4>
 				<h4>Examples:</h4>
 				<ul>
@@ -158,12 +158,16 @@
 					<input class="form-control" id="endWord" type="text">
 				</div>
 
-				<form id="pathSearch">
-					<input class="form-control" type="submit">
+				<form id="wordLadder">
+					<input class="form-control" type="submit" value="Generate Path">
+				</form>
+				<form id="graphDraw">
+					<p class="text-danger">I highly discourage running the below graph drawing for any word larger than length 4 since it will strain browser resources (length 4 creates over 19000 svg elements).</p>
+					<input class="form-control" type="submit" value="Generate Graph">
 				</form>
 			</div>
 
-			<div id="result" class="col-sm-8"></div>
+			<div id="result" class="col-sm-9"></div>
 		</div>
 	</div>
 </body>
