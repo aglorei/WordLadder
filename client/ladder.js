@@ -9,7 +9,7 @@ function drawLadder(start_word, end_word) {
   if (!(end_word in dictionary)) { return writeHTML('errors','text-danger','"' + end_word + '"' + ' was not found in the dictionary.'); }
 
   // create object to push used words
-  var usedWords = {};
+  var used_words = {};
 
   // create queue for BFS and enqueue start_word
   var queue = new Queue();
@@ -24,9 +24,9 @@ function drawLadder(start_word, end_word) {
       return writeHTML('result', 'text-success', node.path());
     }
 
-    if (!(node.word in usedWords)) {
+    if (!(node.word in used_words)) {
       // add node word to resource object
-      usedWords[node.word] = null;
+      used_words[node.word] = null;
 
       // create and enqueue adjacent words
       var children = collectChildren(node.word);
