@@ -1,5 +1,5 @@
 // create links (i.e. graph edges) for a word length
-function graphDraw(startWord, endWord) {
+function drawGraph(startWord, endWord) {
   if (startWord.length != endWord.length) { return false; }
   var length = startWord.length;
   var links = [];
@@ -12,7 +12,7 @@ function graphDraw(startWord, endWord) {
       usedWords[word] = null;
 
       // go through unused children and create link
-      var children = graphExtend(word);
+      var children = collectChildren(word);
       for (var i=0; i<children.length; i++) {
         if (!(children[i] in usedWords)) {
           var edge = {
@@ -63,7 +63,7 @@ function graphDraw(startWord, endWord) {
     .call(force.drag);
 
   node.append("circle")
-    .attr("r", 4)
+    .attr("r", 4);
 
   node.append("text")
     .attr("x", 12)

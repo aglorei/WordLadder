@@ -20,23 +20,23 @@
   <script type="text/javascript">
 
   $(document).ready(function(){
-    $('#wordLadder').submit(function() {
+    $('#generate_ladder').submit(function() {
       $('#result').html('');
       $('#errors').html('');
-      WordLadder($('#startWord').val(), $('#endWord').val());
+      drawLadder($('#startWord').val(), $('#endWord').val());
       return false;
     });
 
-    $('#graphDraw').submit(function() {
-      graphDraw($('#startWord').val(), $('#endWord').val());
+    $('#graph_draw').submit(function() {
+      drawGraph($('#startWord').val(), $('#endWord').val());
       return false;
     });
 
     // 'oh'/'no' example
     $('#startWord').val('oh');
     $('#endWord').val('no');
-    WordLadder('oh', 'no');
-    graphDraw('oh', 'no');
+    drawLadder('oh', 'no');
+    drawGraph('oh', 'no');
   });
 
   // function to write HTML content
@@ -77,10 +77,10 @@
           <input class="form-control" id="endWord" type="text">
         </div>
 
-        <form id="wordLadder">
+        <form id="generate_ladder">
           <input class="form-control" type="submit" value="Generate Path">
         </form>
-        <form id="graphDraw">
+        <form id="graph_draw">
           <p class="text-danger">Warning: running the below graph drawing where 4 < word length < 10 will strain resources (length 4 creates over 19,000 svg elements).</p>
           <input class="form-control" type="submit" value="Generate Graph">
         </form>

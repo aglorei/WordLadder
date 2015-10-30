@@ -1,26 +1,26 @@
 // main problem-solving function
-function WordLadder(startWord, endWord) {
-  startWord = startWord.toLowerCase();
-  endWord = endWord.toLowerCase();
+function drawLadder(start_word, end_word) {
+  start_word = start_word.toLowerCase();
+  end_word = end_word.toLowerCase();
 
   // input errors
-  if (startWord.length != endWord.length) { return writeHTML('errors','text-danger','Words must be the same length'); }
-  if (!(startWord in dictionary)) { return writeHTML('errors','text-danger','"' + startWord + '"' + ' was not found in the dictionary.'); }
-  if (!(endWord in dictionary)) { return writeHTML('errors','text-danger','"' + endWord + '"' + ' was not found in the dictionary.'); }
+  if (start_word.length != end_word.length) { return writeHTML('errors','text-danger','Words must be the same length'); }
+  if (!(start_word in dictionary)) { return writeHTML('errors','text-danger','"' + start_word + '"' + ' was not found in the dictionary.'); }
+  if (!(end_word in dictionary)) { return writeHTML('errors','text-danger','"' + end_word + '"' + ' was not found in the dictionary.'); }
 
   // create object to push used words
   var usedWords = {};
 
-  // create queue for BFS and enqueue startWord
+  // create queue for BFS and enqueue start_word
   var queue = new Queue();
-  queue.enqueue(new graphNode(startWord));
+  queue.enqueue(new GraphNode(start_word));
 
   // BFS
   while (!queue.isEmpty()) {
     var node = queue.dequeue();
 
-    // return if endWord is reached
-    if (node.word == endWord) {
+    // return if end_word is reached
+    if (node.word == end_word) {
       return writeHTML('result', 'text-success', node.path());
     }
 
@@ -29,10 +29,10 @@ function WordLadder(startWord, endWord) {
       usedWords[node.word] = null;
 
       // create and enqueue adjacent words
-      var children = graphExtend(node.word);
+      var children = collectChildren(node.word);
 
       for (var i=0; i<children.length; i++) {
-        var child = new graphNode(children[i]);
+        var child = new GraphNode(children[i]);
         child.parent = node; // set child's parent
         node.adjacent.push(child); // update array of parent's adjacent nodes
         queue.enqueue(child);
@@ -45,7 +45,7 @@ function WordLadder(startWord, endWord) {
 }
 
 // substitute each character in the word all characters
-function graphExtend (word) {
+function collectChildren (word) {
   var result = [];
 
   for (var i=0; i<word.length; i++) {
@@ -58,8 +58,8 @@ function graphExtend (word) {
   return result;
 }
 
-// graph item
-var graphNode = function(word) {
+// graph object
+var GraphNode = function(word) {
   this.word = word;
   this.parent = null;
   this.adjacent = [];

@@ -1,5 +1,5 @@
 // queue item
-var queueNode = function(item) {
+var QueueNode = function(item) {
   this.item = item;
   this.next = null;
 };
@@ -11,10 +11,10 @@ var Queue = function() {
 
   this.enqueue = function(item) {
     if (!first) {
-      last = new queueNode(item);
+      last = new QueueNode(item);
       first = last;
     } else {
-      last.next = new queueNode(item);
+      last.next = new QueueNode(item);
       last = last.next;
     }
   };
