@@ -35,3 +35,4 @@ var Queue = function() {
     return (!first);
   };
 };
+
