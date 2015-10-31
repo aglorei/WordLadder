@@ -10,7 +10,7 @@ var Queue = function() {
   var last = null;
 
   this.enqueue = function(item) {
-    if (!first) {
+    if (this.isEmpty()) {
       last = new QueueNode(item);
       first = last;
     } else {
@@ -20,11 +20,11 @@ var Queue = function() {
   };
 
   this.dequeue = function() {
-    if (first) {
+    if (!this.isEmpty()) {
       var item = first.item;
 
       first = first.next;
-      if (!first) { last = null; } // if empty, empty queue
+      if (this.isEmpty()) { last = null; } // if empty, empty queue
 
       return item;
     }
@@ -32,7 +32,7 @@ var Queue = function() {
   };
 
   this.isEmpty = function() {
-    return (!first);
+    return !first;
   };
 };
 

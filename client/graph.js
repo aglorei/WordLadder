@@ -1,20 +1,20 @@
 // create links (i.e. graph edges) for a word length
-function drawGraph(startWord, endWord) {
-  if (startWord.length != endWord.length) { return false; }
-  var length = startWord.length;
+function drawGraph(start_word, end_word) {
+  if (start_word.length != end_word.length) { return false; }
+  var length = start_word.length;
   var links = [];
-  var usedWords = {};
+  var used_words = {};
   var nodes = {};
 
   for (var word in dictionary) {
     // find unused words of matching length and find children
-    if (!(word in usedWords) && word.length == length) {
-      usedWords[word] = null;
+    if (word.length == length && !(word in used_words)) {
+      used_words[word] = null;
 
       // go through unused children and create link
       var children = collectChildren(word);
       for (var i=0; i<children.length; i++) {
-        if (!(children[i] in usedWords)) {
+        if (!(children[i] in used_words)) {
           var edge = {
             source: word,
             target: children[i]

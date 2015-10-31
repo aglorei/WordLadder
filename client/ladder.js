@@ -44,7 +44,7 @@ function drawLadder(start_word, end_word) {
   return writeHTML('result', 'text-danger', 'No paths exist between these two words.');
 }
 
-// substitute each character in the word all characters
+// substitute each character in the word
 function collectChildren (word) {
   var result = [];
 
